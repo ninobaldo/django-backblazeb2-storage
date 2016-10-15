@@ -79,4 +79,4 @@ class B2Storage(Storage):
 
 
     def url(self, name):
-        return self.b2.get_url(name)
+        return self.b2.get_public_url(name)

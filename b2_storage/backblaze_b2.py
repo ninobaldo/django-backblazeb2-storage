@@ -78,6 +78,10 @@ class BackBlazeB2(object):
         return "%s/file/%s/%s" % (self.download_url, self.bucket_name, name)
 
 
+    def get_public_url(self, name):
+        return "https://f001.backblazeb2.com/file/%s/%s" % (self.bucket_name, name)
+
+
     def download_file(self, name):
         headers = { 'Authorization': self.authorization_token }
         return requests.get(self.get_url(name), headers = headers).content
