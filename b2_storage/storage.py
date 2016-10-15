@@ -8,13 +8,14 @@ from .backblaze_b2 import BackBlazeB2
 
 
 class B2Storage(Storage):
-    def __init__(self, account_id=None, app_key=None, bucket_name=None):
+    def __init__(self, account_id = None, app_key = None, bucket_name = None):
         self.account_id = settings.BACKBLAZEB2_ACCOUNT_ID  # if account_id == None
         self.app_key = settings.BACKBLAZEB2_APP_KEY  # if app_key == None
         self.bucket_name = settings.BACKBLAZEB2_BUCKET_NAME  # if bucket_name == None
-        self.b2 = BackBlazeB2(app_key=self.app_key, account_id=self.account_id, bucket_name=self.bucket_name)
+        self.b2 = BackBlazeB2(app_key = self.app_key, account_id = self.account_id, bucket_name = self.bucket_name)
 
-    def save(self, name, content, max_length=None):
+
+    def save(self, name, content, max_length = None):
         """
         Save and retrieve the filename.
         If the file exists it will make another version of that file.
@@ -28,6 +29,7 @@ class B2Storage(Storage):
             # Raise exception
             pass
 
+
     def exists(self, name):
         '''
         BackBlaze B2 does not have a method to retrieve a filename info.
@@ -39,6 +41,7 @@ class B2Storage(Storage):
 
         return False
 
+
     def _temporary_storage(self, contents):
         '''
         Use this to return file objects
@@ -47,7 +50,8 @@ class B2Storage(Storage):
         conent_file = TemporaryFile(contents, 'r+')
         return conent_file
 
-    def open(self, name, mode='rb'):
+
+    def open(self, name, mode = 'rb'):
         resp = self.b2.download_file(name)
 
         output = BytesIO()
@@ -72,5 +76,7 @@ class B2Storage(Storage):
         # def size(self, name):
         #     pass
         #
-        # def url(self, name):
-        #     pass
+
+
+    def url(self, name):
+        return self.b2.get_url(name)
