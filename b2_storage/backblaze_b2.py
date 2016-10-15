@@ -11,13 +11,11 @@ class BackBlazeB2(object):
         self.account_id = account_id
         self.app_key = app_key
         self.bucket_name = bucket_name
-        self.authorize()
-        self.get_bucket_id_by_name()
 
 
     def authorize(self):
         headers = { 'Authorization': 'Basic: %s' % (
-        base64.b64encode(('%s:%s' % (self.account_id, self.app_key)).encode('utf-8'))).decode('utf-8') }
+            base64.b64encode(('%s:%s' % (self.account_id, self.app_key)).encode('utf-8'))).decode('utf-8') }
         response = requests.get('https://api.backblaze.com/b2api/v1/b2_authorize_account', headers = headers)
         if response.status_code == 200:
             resp = response.json()
@@ -33,13 +31,41 @@ class BackBlazeB2(object):
 
     def get_upload_url(self):
         url = self._build_url('/b2api/v1/b2_get_upload_url')
-        headers = { 'Authorization': self.authorization_token }
-        params = { 'bucketId': self.bucket_id }
+        headers = { 'Authorization': self.get_authorization_token() }
+        params = { 'bucketId': self.get_bucket_id() }
         return requests.get(url, headers = headers, params = params).json()
 
 
+    def get_bucket_id(self):
+        if self.bucket_id is None:
+            self.get_bucket_id_by_name()
+
+        return self.bucket_id
+
+
+    def get_base_url(self):
+        if self.base_url is None:
+            self.authorize()
+
+        return self.base_url
+
+
+    def get_download_url(self):
+        if self.download_url is None:
+            self.authorize()
+
+        return self.download_url
+
+
+    def get_authorization_token(self):
+        if self.authorization_token is None:
+            self.authorize()
+
+        return self.authorization_token
+
+
     def _build_url(self, endpoint = None, authorization = True):
-        return "%s%s" % (self.base_url, endpoint)
+        return "%s%s" % (self.get_base_url(), endpoint)
 
 
     def upload_file(self, name, content):
@@ -70,12 +96,12 @@ class BackBlazeB2(object):
 
 
     def get_file_info(self, name):
-        headers = { 'Authorization': self.authorization_token }
+        headers = { 'Authorization': self.get_authorization_token() }
         return requests.get(self.get_url(name), headers = headers)
 
 
     def get_url(self, name):
-        return "%s/file/%s/%s" % (self.download_url, self.bucket_name, name)
+        return "%s/file/%s/%s" % (self.get_download_url(), self.bucket_name, name)
 
 
     def get_public_url(self, name):
@@ -83,7 +109,7 @@ class BackBlazeB2(object):
 
 
     def download_file(self, name):
-        headers = { 'Authorization': self.authorization_token }
+        headers = { 'Authorization': self.get_authorization_token() }
         return requests.get(self.get_url(name), headers = headers).content
 
 
@@ -91,7 +117,7 @@ class BackBlazeB2(object):
         """
         BackBlaze B2 should  make an endpoint to retrieve buckets by its name.
         """
-        headers = { 'Authorization': self.authorization_token }
+        headers = { 'Authorization': self.get_authorization_token() }
         params = { 'accountId': self.account_id }
         resp = requests.get(self._build_url("/b2api/v1/b2_list_buckets"), headers = headers, params = params).json()
         if 'buckets' in resp:
