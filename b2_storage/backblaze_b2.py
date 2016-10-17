@@ -6,6 +6,10 @@ import hashlib
 
 
 class BackBlazeB2(object):
+    base_url = None
+    download_url = None
+    authorization_token = None
+
     def __init__(self, app_key = None, account_id = None, bucket_name = None):
         self.bucket_id = None
         self.account_id = account_id
